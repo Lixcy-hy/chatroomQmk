@@ -1,0 +1,14 @@
+#ifndef MESSAGETYPEENUM_H
+#define MESSAGETYPEENUM_H
+enum MessageType
+{
+    LOGIN=0X01,
+    REGIST,
+    PRIVATE_MSG,
+    GROUP_MSG,
+    USER_QUERY,
+    GROUP_QUERY,
+    USER_STATUS
+};
+
+#endif // MESSAGETYPEENUM_H

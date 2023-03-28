@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>config/config.yaml</file>
+        <file>config/config.ini</file>
+    </qresource>
+</RCC>

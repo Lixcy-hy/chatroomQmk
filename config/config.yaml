@@ -1,0 +1,7 @@
+MySql:
+    username: 'Lixcy'
+    password: '594826'
+    prot: 3306
+    dbname: 'IM'
+    host: '82.156.235.133'
+
