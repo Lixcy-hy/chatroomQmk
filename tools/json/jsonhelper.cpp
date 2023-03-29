@@ -32,10 +32,12 @@ int JsonHelper::GetCommandType(const QString &msg)
             {
                 QJsonValue value = object_id.value("message_type");
                 return value.toInt();
-
             }
+            return 0;
         }
+        return 0;
     }
+    return 0;
 }
 
 QString JsonHelper::GetMessageData(const QString &msg)
@@ -54,8 +56,11 @@ QString JsonHelper::GetMessageData(const QString &msg)
                 QJsonDocument json = QJsonDocument(object_id.value("data").toObject());
                 return QString(json.toJson(QJsonDocument::Compact));
             }
+            return 0;
         }
+        return 0;
     }
+    return 0;
 }
 
 QJsonValue JsonHelper::GetDataByKey(const QString &msg, const QString &key)
@@ -73,6 +78,30 @@ QJsonValue JsonHelper::GetDataByKey(const QString &msg, const QString &key)
             {
                 return object_id.value(key);
             }
+            return 0;
         }
+        return 0;
     }
+    return 0;
+}
+
+QString JsonHelper::PackMessage(const int type, const QString &result)
+{
+    QJsonObject json;
+    QJsonDocument array = QJsonDocument::fromJson(result.toUtf8());
+    json.insert("message_type",type);
+    json.insert("data",array.array());
+    QJsonDocument str = QJsonDocument(json);
+    return QString(str.toJson(QJsonDocument::Compact));
+}
+
+QString JsonHelper::PackMessage(const int type, const int &result)
+{
+    QJsonObject json;
+    QJsonObject data;
+    json.insert("message_type",type);
+    data.insert("result",result);
+    json.insert("data",data);
+    QJsonDocument str = QJsonDocument(json);
+    return QString(str.toJson(QJsonDocument::Compact));
 }

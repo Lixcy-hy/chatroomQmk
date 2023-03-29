@@ -95,7 +95,7 @@ int DbServer::AlterUserInfo(const UserPo &user)
 
     if(db.isOpen()){
         QSqlQuery sq(db);
-        QString sql = "insert into im_user(user_id,password,nickname,sex,email) value(:user_id,:password,:nickname,:sex,:email);";
+        QString sql = "update im_user set password=:password,nickname=:nickname,sex=:sex,email=:email where user_id=:user_id;";
         sq.prepare(sql);
         sq.bindValue(":user_id",user.getUser_id());
         sq.bindValue(":password",user.getPassword());
@@ -292,10 +292,10 @@ QString DbServer::QueryFriend(const int &user_id)
 
     if(db.isOpen()){
         QSqlQuery sq(db);
-        QString sql = "SELECT CONCAT('[', GROUP_CONCAT(JSON_OBJECT('msg_id',msg_id,'sender_user_id',sender_user_id, 'receiver_user_id',receiver_user_id, 'msg_date',msg_date, 'msg_content',msg_content)), ']') FROM im_msg_private WHERE sender_user_id = :sender_user_id OR receiver_user_id = :receiver_user_id ; ";
+        QString sql = "SELECT CONCAT('[', GROUP_CONCAT(JSON_OBJECT('user_id',user_id, 'nickname',nickname, 'sex',sex, 'email',email)), ']')FROM im_user WHERE user_id IN (	SELECT 	friend_id FROM im_friend WHERE user_id = :user_id) ";
         sq.prepare(sql);
         sq.bindValue(":sender_user_id",user_id);
-        sq.bindValue(":receiver_user_id",user_id);
+        //sq.bindValue(":receiver_user_id",user_id);
         sq.exec();
         sq.next();
         qDebug() << sq.value(0);
@@ -317,7 +317,7 @@ QString DbServer::QueryGourp(const int &user_id)
 
     if(db.isOpen()){
         QSqlQuery sq(db);
-        QString sql = "SELECT CONCAT('[', GROUP_CONCAT(JSON_OBJECT('friend_id', friend_id)), ']') FROM im_group WHERE user_id = :user_id";
+        QString sql = "SELECT CONCAT('[', GROUP_CONCAT(JSON_OBJECT('group_id', group_id)), ']')FROM im_user_group WHERE user_id = :user_id;";
         sq.prepare(sql);
         sq.bindValue(":user_id",user_id);
         sq.exec();
@@ -349,7 +349,7 @@ QString DbServer::QueryUserMsg(const int &user_id)
         sq.bindValue(":receiver_user_id",user_id);
         sq.exec();
         sq.next();
-        qDebug() << sq.value(0);
+        //qDebug() << sq.value(0);
 
         db.close();
         return sq.value(0).toString();
@@ -369,14 +369,15 @@ QString DbServer::QueryGroupMsg(const int &user_id)
 
     if(db.isOpen()){
         QSqlQuery sq(db);
-        QString sql = "SELECT CONCAT('[',GROUP_CONCAT( JSON_OBJECT('msg_id', msg_id,'sender_user_id', sender_user_id, 'receiver_user_id', receiver_user_id, 'msg_date', msg_date, 'msg_content', msg_content)), ']') FROM im_msg_group WHERE receiver_user_id in(SELECT	group_id FROM im_user_group	WHERE user_id = :user_id)；";
+        QString sql = "SELECT CONCAT('[',GROUP_CONCAT( JSON_OBJECT('msg_id', msg_id,'sender_user_id', sender_user_id, 'receiver_user_id', receiver_user_id, 'msg_date', msg_date, 'msg_content', msg_content)), ']') FROM im_msg_group WHERE receiver_user_id in(SELECT	group_id FROM im_user_group	WHERE user_id = :user_id);";
         sq.prepare(sql);
         sq.bindValue(":user_id",user_id);
         sq.exec();
-        sq.next();
-        qDebug() << sq.value(0);
-
-        return sq.value(0).toString();
+        if(sq.first())
+        {
+            return sq.value(0).toString();
+        }
+        return 0;
     }
     else
     {

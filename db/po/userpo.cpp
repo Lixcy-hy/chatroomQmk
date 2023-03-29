@@ -62,7 +62,7 @@ UserPo::UserPo(const QString &json)
                 QJsonValue value = object_pwd.value("email");
                 if (value.isString()) {
                     QString strName = value.toString();
-                    this->password = strName;
+                    this->email = strName;
                     //qDebug() << "Name : " << strName;
                 }
             }

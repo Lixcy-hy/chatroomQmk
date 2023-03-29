@@ -8,7 +8,10 @@ enum MessageType
     GROUP_MSG,
     USER_QUERY,
     GROUP_QUERY,
-    USER_STATUS
+    USER_STATUS,
+    USER_INFO_UPDATE,
+    SEND_MSG_PRIVATE,
+    SEMD_MSG_GROUP
 };
 
 #endif // MESSAGETYPEENUM_H

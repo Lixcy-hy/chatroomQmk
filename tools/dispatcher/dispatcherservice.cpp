@@ -69,8 +69,10 @@ bool DispatcherService::NewConnect()
 
 void DispatcherService::PushMessageToQuene(const QString &msg)
 {
-    QString cmd = "LPUSH message_list /" + msg + "/";
-    qDebug() << msg;
+    QString msgFormat = QString(msg);
+    msgFormat.replace(" ","0X00");
+    QString cmd = "LPUSH message_list /" + msgFormat + "/";
+    //qDebug() << msg;
     DbHelper::RedisNoReturn(cmd);
 }
 
@@ -79,33 +81,71 @@ void DispatcherService::PopMessageFromQuene()
 
     QString cmd = "RPOP message_list ";
     QString str = DbHelper::RedisReturn(cmd);
-    qDebug() << str;
+    str.replace("0X00"," ");
+    str.remove(0,1);
+    str.remove(-1,1);
+    QString result = NULL;
+    int resultInt = 0;
     if(str != "")
     {
+        qDebug() << str;
         int cmd_type = JsonHelper::GetCommandType(str);
-        QString data = JsonHelper::GetMessageData(str);
-        QJsonValue user_id = JsonHelper::GetDataByKey(data,"user_id");
-        //qDebug() << po.getMsg_content();
-        switch(cmd_type)
-        {
-        case MessageType::GROUP_MSG:
-            //QJsonValue user_id = JsonHelper::GetDataByKey(data,"user_id");
-            DbServer::SendMsg(GroupMsgPo(data));
-            break;
-        case MessageType::GROUP_QUERY:
-            DbServer::QueryGroupMsg(user_id.toInt());
-            break;
-        case MessageType::USER_QUERY:
-            DbServer::QueryFriend(user_id.toInt());
-            break;
-        case MessageType::PRIVATE_MSG:
-            DbServer::QueryUserMsg(user_id.toInt());
-            break;
-        case MessageType::USER_STATUS:
-            break;
-        default:
-            break;
-        };
+        if(cmd_type != 0){
+            QString data = JsonHelper::GetMessageData(str);
+            QJsonValue user_id;
+            QJsonValue rece_id;
+            //qDebug() << po.getMsg_content();
+            switch(cmd_type)
+            {
+            case MessageType::GROUP_MSG:
+                //QJsonValue user_id = JsonHelper::GetDataByKey(data,"user_id");
+                //resultInt = DbServer::SendMsg(GroupMsgPo(data));
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                result = DbServer::QueryGroupMsg(user_id.toInt());
+                break;
+            case MessageType::GROUP_QUERY:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                result = DbServer::QueryGourp(user_id.toInt());
+                break;
+            case MessageType::USER_QUERY:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                result = DbServer::QueryFriend(user_id.toInt());
+                break;
+            case MessageType::PRIVATE_MSG:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                result = DbServer::QueryUserMsg(user_id.toInt());
+                break;
+            case MessageType::USER_STATUS:
+                break;
+            case MessageType::USER_INFO_UPDATE:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                resultInt = DbServer::AlterUserInfo(UserPo(data));
+                break;
+            case MessageType::SEMD_MSG_GROUP:
+                break;
+            case MessageType::SEND_MSG_PRIVATE:
+                break;
+            case MessageType::ADD_FRIEND:
+
+            case MessageType::ADD_GROUP:
+            default:
+                break;
+            };
+            if(result != NULL)
+            {
+                qDebug() << "result:" << user_id.toInt();
+                user_server->SendMessage(user_id.toInt(),JsonHelper::PackMessage(user_id.toInt(),result));
+            }
+            else if(resultInt != 0)
+            {
+                qDebug() << "resultInt:" << user_id.toInt();
+                user_server->SendMessage(user_id.toInt(),JsonHelper::PackMessage(user_id.toInt(),resultInt));
+            }
+            else
+            {
+                user_server->SendMessage(user_id.toInt(),"error");
+            }
+        }
 
     }
 }

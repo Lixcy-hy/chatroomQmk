@@ -15,15 +15,15 @@ int main(int argc, char *argv[])
 //    UserService * use = new UserService();
 //    QWebSocket * user = new QWebSocket();
 //    use->UserLogin(1,user);
-//    DispatcherService* dispatcher_server = new DispatcherService();
+    DispatcherService* dispatcher_server = new DispatcherService();
 
 //    DbServer * db = new DbServer();
 
 //    QString user = "{\"user_id\":4,\"nickname\":\"张三\",\"password\":\"112233\"}";
 //    QString privatePo = "{\"msg_content\":\"test msg 3\",\"sender_user_id\":3,\"receiver_user_id\":2}";
-    GroupMsgPo poo = GroupMsgPo("{\"msg_content\":\"dispatcher test\",\"receiver_user_id\":1,\"sender_user_id\":2}");
-    auto localSendMsg = DbServer::SendMsg(poo);
-    qDebug() << Result(localSendMsg);
+//    GroupMsgPo poo = GroupMsgPo("{\"msg_content\":\"dispatcher test\",\"receiver_user_id\":1,\"sender_user_id\":2}");
+//    auto localSendMsg = DbServer::SendMsg(poo);
+//    qDebug() << Result(localSendMsg);
 //    PrivateMsgPo ppo(privatePo);
 //    UserPo po(user);
 //    po.PrintParam();
