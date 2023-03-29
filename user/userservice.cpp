@@ -49,9 +49,10 @@ bool UserService::GetUserStatus(const int user_id)
 bool UserService::SendMessage(const int user_id, const QString &msg)
 {
     try {
-
+        //qDebug() << "result:" << msg;
         UserSession user = UserSession(user_id);
-        int index = user_list.indexOf(user);
+        int index = user_list.indexOf(user);        
+        qDebug() << "result:" << msg << index << user_id;
         user_list[index].SendMsg(msg);
         return true;
     } catch (...)
