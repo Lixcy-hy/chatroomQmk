@@ -11,7 +11,9 @@ enum MessageType
     USER_STATUS,
     USER_INFO_UPDATE,
     SEND_MSG_PRIVATE,
-    SEMD_MSG_GROUP
+    SEMD_MSG_GROUP,
+    ADD_FRIEND,
+    ADD_GROUP
 };
 
 #endif // MESSAGETYPEENUM_H

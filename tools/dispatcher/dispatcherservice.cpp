@@ -108,8 +108,7 @@ void DispatcherService::PopMessageFromQuene()
                 result = DbServer::QueryGourp(user_id.toInt());
                 break;
             case MessageType::USER_QUERY:
-                user_id = JsonHelper::GetDataByKey(data,"user_id");
-                result = DbServer::QueryFriend(user_id.toInt());
+                user_id = JsonHelper::GetDataByKey(data,"user_id");//////////+                result = DbServer::QueryFriend(user_id.toInt());
                 break;
             case MessageType::PRIVATE_MSG:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
