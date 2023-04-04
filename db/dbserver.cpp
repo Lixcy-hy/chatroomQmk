@@ -375,16 +375,63 @@ QString DbServer::QueryGroupMsg(const int &user_id)
         sq.exec();
         if(sq.first())
         {
+            db.close();
             return sq.value(0).toString();
         }
+        db.close();
         return 0;
     }
     else
     {
+        db.close();
         return QString(Result::CONNECT_ERROR);
     }
 
-    db.close();
+}
+
+QList<int> DbServer::QueryUserFriendId(const int &user_id)
+{
+    QSqlDatabase db = DbHelper::DbConnect();
+
+    if(db.isOpen()){
+        QSqlQuery sq(db);
+        QString sql = "SELECT user_id FROM im_user";
+        sq.prepare(sql);
+        sq.bindValue(":user_id",user_id);
+        sq.exec();
+        if(sq.first())
+        {
+            db.close();
+        }
+        db.close();
+    }
+    else
+    {
+        db.close();
+    }
+
+}
+
+QList<int> DbServer::QueryGroupFriendId(const int &group_id)
+{
+    QSqlDatabase db = DbHelper::DbConnect();
+
+    QList<int> list;
+    if(db.isOpen()){
+        QSqlQuery sq(db);
+        QString sql = "SELECT user_id FROM im_user_group iug  WHERE group_id = :group_id;";
+        sq.prepare(sql);
+        sq.bindValue(":group_id",group_id);
+        if(sq.exec())
+        {
+            if(sq.next())
+            {
+                list.append(sq.value(0).toInt());
+            }
+            return list;
+        }
+        return list;
+}
 }
 
 void DbServer::run()

@@ -6,6 +6,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <QDebug>
+
 class GroupMsgPo : public QObject
 {
     Q_OBJECT

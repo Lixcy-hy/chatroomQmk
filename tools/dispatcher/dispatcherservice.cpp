@@ -108,7 +108,8 @@ void DispatcherService::PopMessageFromQuene()
                 result = DbServer::QueryGourp(user_id.toInt());
                 break;
             case MessageType::USER_QUERY:
-                user_id = JsonHelper::GetDataByKey(data,"user_id");//////////+                result = DbServer::QueryFriend(user_id.toInt());
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                result = DbServer::QueryFriend(user_id.toInt());
                 break;
             case MessageType::PRIVATE_MSG:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
@@ -121,12 +122,25 @@ void DispatcherService::PopMessageFromQuene()
                 resultInt = DbServer::AlterUserInfo(UserPo(data));
                 break;
             case MessageType::SEMD_MSG_GROUP:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                resultInt = DbServer::SendMsg(GroupMsgPo(data));
+                user_server->SendMessage(DbServer::QueryGroupFriendId(rece_id.toInt()),str);
                 break;
             case MessageType::SEND_MSG_PRIVATE:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                resultInt = DbServer::SendMsg(PrivateMsgPo(data));
+                user_server->SendMessage(user_id.toInt(),str);
                 break;
             case MessageType::ADD_FRIEND:
-
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                resultInt = DbServer::AddFriend(user_id.toInt(),rece_id.toInt());
             case MessageType::ADD_GROUP:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                resultInt = DbServer::AddGroup(user_id.toInt(),rece_id.toInt());
             default:
                 break;
             };

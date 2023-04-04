@@ -43,6 +43,10 @@ public:
     static QString QueryUserMsg(const int &user_id);
     // 查询消息信息(群组)
     static QString QueryGroupMsg(const int &user_id);
+    // 查询好友id数组
+    static QList<int> QueryUserFriendId(const int &user_id);
+    // 查询群组成员id
+    static QList<int> QueryGroupFriendId(const int &group_id);
 
 signals:
 

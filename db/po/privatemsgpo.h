@@ -6,6 +6,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <QDebug>
+
 class PrivateMsgPo : public QObject
 {
     Q_OBJECT

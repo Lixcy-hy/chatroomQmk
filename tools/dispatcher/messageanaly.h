@@ -7,6 +7,8 @@
 #include <QJsonObject>
 #include "tools/enum/MessageTypeEnum.h"
 
+#include <QDebug>
+
 class MessageAnaly : public QObject
 {
     Q_OBJECT
