@@ -13,7 +13,7 @@ class JsonHelper : public QObject
 public:
     explicit JsonHelper(QObject *parent = nullptr);
 
-    static QString LoginRespond(const int result);
+    static QString LoginRespond(const int result,const int user_id);
 
     static int GetCommandType(const QString &msg);
 

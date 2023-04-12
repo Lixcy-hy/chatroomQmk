@@ -13,7 +13,10 @@ enum MessageType
     SEND_MSG_PRIVATE,
     SEMD_MSG_GROUP,
     ADD_FRIEND,
-    ADD_GROUP
+    ADD_GROUP,
+    CREATE_GROUP,
+    HERT_BEATS,
+    SELF_QUERY
 };
 
 #endif // MESSAGETYPEENUM_H

@@ -23,6 +23,8 @@ public:
     static int SignIn(const UserPo & user);
     // 用户登录认证
     static int LogIn(const UserPo & user);
+    // 查询个人信息
+    static QString QuerySelfData(const int user_id);
     // 修改用户信息
     static int AlterUserInfo(const UserPo & user);
     // 发送信息(入库)

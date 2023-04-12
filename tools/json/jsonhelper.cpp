@@ -6,11 +6,12 @@ JsonHelper::JsonHelper(QObject *parent)
 
 }
 
-QString JsonHelper::LoginRespond(const int result)
+QString JsonHelper::LoginRespond(const int result, const int user_id)
 {
     QJsonObject root;
     QJsonObject data;
     data.insert("login_result",result);
+    data.insert("user_id",user_id);
     root.insert("message_type",MessageType::LOGIN);
     root.insert("data",data);
     QJsonDocument json = QJsonDocument(root);
@@ -90,7 +91,14 @@ QString JsonHelper::PackMessage(const int type, const QString &result)
     QJsonObject json;
     QJsonDocument array = QJsonDocument::fromJson(result.toUtf8());
     json.insert("message_type",type);
-    json.insert("data",array.array());
+    if(array.isArray())
+    {
+        json.insert("data",array.array());
+    }
+    else if(array.isObject())
+    {
+        json.insert("data",array.object());
+    }
     QJsonDocument str = QJsonDocument(json);
     return QString(str.toJson(QJsonDocument::Compact));
 }

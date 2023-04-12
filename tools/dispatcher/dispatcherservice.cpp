@@ -36,23 +36,36 @@ bool DispatcherService::NewConnect()
     QString password = localNextPendingConnection->resourceName().split('?')[1].split('&')[1].split('=')[1];
 
     UserPo user = UserPo(name.toInt(),password);
-    qDebug() <<  name.toInt() <<  "：" << password << ":" << type;
+    qDebug() <<"登录用户的的id为:" <<  name.toInt() ;
     if(type == 1)
     {
         int login_result = DbServer::LogIn(user);
+        qDebug() << "用户查询结果为：" << login_result;
         if(login_result == Result::LOGIN_SUCCESS)
         {
             bool result = this->user_server->UserLogin(name.toInt(),localNextPendingConnection);
-            qDebug() <<  "login success" << result;
+            qDebug() <<  "登录结果：" << result;
             if(result)
             {
                 connect(localNextPendingConnection,&QWebSocket::textMessageReceived,this,&DispatcherService::PushMessageToQuene);
-                //  TODO:replay login success
-                qDebug() <<  "insert success";
-                localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result));
+                qDebug() <<  "信令系统--添加新用户执行成功 ";
+                // 返回登录结果
+                localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result,name.toInt()));
+
+                // TODO: 用户心跳检测 长时间无心条则断开链接
                 return true;
             }
+            else
+            {
+                localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result,-1));
+                return false;
+            }
 
+        }
+        else
+        {
+            localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result,-1));
+            return false;
         }
     }
     else if(type == 2)
@@ -60,7 +73,7 @@ bool DispatcherService::NewConnect()
         int login_result = DbServer::SignIn(user);
         if(login_result == Result::REGIST_SUCCESS)
         {
-            localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result));
+            localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result,name.toInt()));
             return true;
         }
     }
@@ -88,12 +101,13 @@ void DispatcherService::PopMessageFromQuene()
     int resultInt = 0;
     if(str != "")
     {
-        qDebug() << str;
+        qDebug() << "接收到的的信息为:" << str;
         int cmd_type = JsonHelper::GetCommandType(str);
         if(cmd_type != 0){
             QString data = JsonHelper::GetMessageData(str);
             QJsonValue user_id;
             QJsonValue rece_id;
+            QJsonValue name;
             //qDebug() << po.getMsg_content();
             switch(cmd_type)
             {
@@ -122,41 +136,63 @@ void DispatcherService::PopMessageFromQuene()
                 resultInt = DbServer::AlterUserInfo(UserPo(data));
                 break;
             case MessageType::SEMD_MSG_GROUP:
-                user_id = JsonHelper::GetDataByKey(data,"user_id");
-                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                user_id = JsonHelper::GetDataByKey(data,"sender_user_id");
+                rece_id = JsonHelper::GetDataByKey(data,"receiver_user_id");
                 resultInt = DbServer::SendMsg(GroupMsgPo(data));
                 user_server->SendMessage(DbServer::QueryGroupFriendId(rece_id.toInt()),str);
                 break;
             case MessageType::SEND_MSG_PRIVATE:
-                user_id = JsonHelper::GetDataByKey(data,"user_id");
-                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                user_id = JsonHelper::GetDataByKey(data,"sender_user_id");
+                rece_id = JsonHelper::GetDataByKey(data,"receiver_user_id");
                 resultInt = DbServer::SendMsg(PrivateMsgPo(data));
-                user_server->SendMessage(user_id.toInt(),str);
+                user_server->SendMessage(rece_id.toInt(),str);
                 break;
             case MessageType::ADD_FRIEND:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
                 rece_id = JsonHelper::GetDataByKey(data,"frind_id");
                 resultInt = DbServer::AddFriend(user_id.toInt(),rece_id.toInt());
+                resultInt = DbServer::AddFriend(rece_id.toInt(),user_id.toInt());
+                break;
             case MessageType::ADD_GROUP:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
                 rece_id = JsonHelper::GetDataByKey(data,"frind_id");
-                resultInt = DbServer::AddGroup(user_id.toInt(),rece_id.toInt());
+                resultInt = DbServer::AddGroup(rece_id.toInt(),user_id.toInt());
+                break;
+            case MessageType::CREATE_GROUP:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                name = JsonHelper::GetDataByKey(data,"group_name");
+                resultInt = DbServer::CreateGroup(name.toString(),user_id.toInt());
+                break;
+            case MessageType::HERT_BEATS:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                break;
+                resultInt = Result::HEARTBEATS;
+            case MessageType::SELF_QUERY:
+                user_id = JsonHelper::GetDataByKey(data,"user_id");
+                result = DbServer::QuerySelfData(user_id.toInt());
+                qDebug() << result;
+                break;
             default:
                 break;
             };
             if(result != NULL)
             {
-                qDebug() << "result:" << user_id.toInt();
-                user_server->SendMessage(user_id.toInt(),JsonHelper::PackMessage(user_id.toInt(),result));
+                qDebug() << "result:" << cmd_type;
+                user_server->SendMessage(user_id.toInt(),JsonHelper::PackMessage(cmd_type,result));
             }
             else if(resultInt != 0)
             {
                 qDebug() << "resultInt:" << user_id.toInt();
-                user_server->SendMessage(user_id.toInt(),JsonHelper::PackMessage(user_id.toInt(),resultInt));
+                user_server->SendMessage(user_id.toInt(),JsonHelper::PackMessage(cmd_type,resultInt));
+            }
+            else if(resultInt == Result::HEARTBEATS)
+            {
+                user_server->SendMessage(user_id.toInt(),"{\"message_type\":14}");
             }
             else
-            {
-                user_server->SendMessage(user_id.toInt(),"error");
+            {                
+                qDebug() << "发送错误";
+                //user_server->SendMessage(user_id.toInt(),"error");
             }
         }
 
