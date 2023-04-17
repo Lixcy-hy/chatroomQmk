@@ -21,8 +21,11 @@ public:
     int getUser_id() const;
     QString getNickname() const;
     QString getPassword() const;
-    QString getSex() const;
+    int getSex() const;
     QString getEmail() const;
+
+
+    const QString &getAvatar() const;
 
 signals:
 
@@ -31,8 +34,9 @@ private:
     int user_id;
     QString nickname;
     QString password;
-    QString sex;
+    int sex;
     QString email;
+    QString avatar;
 };
 
 #endif // USERPO_H

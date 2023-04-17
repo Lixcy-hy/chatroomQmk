@@ -65,6 +65,7 @@ bool DispatcherService::NewConnect()
         else
         {
             localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result,-1));
+            localNextPendingConnection->close();
             return false;
         }
     }
@@ -74,6 +75,7 @@ bool DispatcherService::NewConnect()
         if(login_result == Result::REGIST_SUCCESS)
         {
             localNextPendingConnection->sendTextMessage(JsonHelper::LoginRespond(login_result,name.toInt()));
+            localNextPendingConnection->close();
             return true;
         }
     }
@@ -149,13 +151,13 @@ void DispatcherService::PopMessageFromQuene()
                 break;
             case MessageType::ADD_FRIEND:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
-                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                rece_id = JsonHelper::GetDataByKey(data,"friend_id");
                 resultInt = DbServer::AddFriend(user_id.toInt(),rece_id.toInt());
                 resultInt = DbServer::AddFriend(rece_id.toInt(),user_id.toInt());
                 break;
             case MessageType::ADD_GROUP:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
-                rece_id = JsonHelper::GetDataByKey(data,"frind_id");
+                rece_id = JsonHelper::GetDataByKey(data,"friend_id");
                 resultInt = DbServer::AddGroup(rece_id.toInt(),user_id.toInt());
                 break;
             case MessageType::CREATE_GROUP:

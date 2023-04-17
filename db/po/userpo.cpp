@@ -50,11 +50,9 @@ UserPo::UserPo(const QString &json)
             if (object_sex.contains("sex"))
             {
                 QJsonValue value = object_pwd.value("sex");
-                if (value.isString()) {
-                    QString strName = value.toString();
-                    this->password = strName;
-                    //qDebug() << "Name : " << strName;
-                }
+                this->password = value.toInt();
+                //qDebug() << "Name : " << strName;
+
             }
             QJsonObject object_email = document.object();  // 转化为对象
             if (object_email.contains("email"))
@@ -63,6 +61,16 @@ UserPo::UserPo(const QString &json)
                 if (value.isString()) {
                     QString strName = value.toString();
                     this->email = strName;
+                    //qDebug() << "Name : " << strName;
+                }
+            }
+            QJsonObject object_avatar = document.object();  // 转化为对象
+            if (object_avatar.contains("avatar"))
+            {
+                QJsonValue value = object_pwd.value("avatar");
+                if (value.isString()) {
+                    QString strName = value.toString();
+                    this->avatar = strName;
                     //qDebug() << "Name : " << strName;
                 }
             }
@@ -104,7 +112,7 @@ QString UserPo::getPassword() const
     return password;
 }
 
-QString UserPo::getSex() const
+int UserPo::getSex() const
 {
     return sex;
 }
@@ -112,5 +120,10 @@ QString UserPo::getSex() const
 QString UserPo::getEmail() const
 {
     return email;
+}
+
+const QString &UserPo::getAvatar() const
+{
+    return avatar;
 }
 
