@@ -136,6 +136,8 @@ void DispatcherService::PopMessageFromQuene()
             case MessageType::USER_INFO_UPDATE:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
                 resultInt = DbServer::AlterUserInfo(UserPo(data));
+                //用户状态返回
+                result = DbServer::QuerySelfData(user_id.toInt());
                 break;
             case MessageType::SEMD_MSG_GROUP:
                 user_id = JsonHelper::GetDataByKey(data,"sender_user_id");
@@ -154,16 +156,22 @@ void DispatcherService::PopMessageFromQuene()
                 rece_id = JsonHelper::GetDataByKey(data,"friend_id");
                 resultInt = DbServer::AddFriend(user_id.toInt(),rece_id.toInt());
                 resultInt = DbServer::AddFriend(rece_id.toInt(),user_id.toInt());
+                // 返回好友信息
+                result = DbServer::QueryFriend(user_id.toInt());
                 break;
             case MessageType::ADD_GROUP:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
                 rece_id = JsonHelper::GetDataByKey(data,"friend_id");
                 resultInt = DbServer::AddGroup(rece_id.toInt(),user_id.toInt());
+                // 返回群组消息
+                result = DbServer::QueryGourp(user_id.toInt());
                 break;
             case MessageType::CREATE_GROUP:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
                 name = JsonHelper::GetDataByKey(data,"group_name");
                 resultInt = DbServer::CreateGroup(name.toString(),user_id.toInt());
+                // 返回群组消息
+                result = DbServer::QueryGourp(user_id.toInt());
                 break;
             case MessageType::HERT_BEATS:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
@@ -172,7 +180,6 @@ void DispatcherService::PopMessageFromQuene()
             case MessageType::SELF_QUERY:
                 user_id = JsonHelper::GetDataByKey(data,"user_id");
                 result = DbServer::QuerySelfData(user_id.toInt());
-                qDebug() << result;
                 break;
             default:
                 break;
